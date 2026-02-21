@@ -248,27 +248,87 @@
             /* Text matches background red */
         }
 
-        /* --- Android Navigation Bar --- */
-        .nav-bar {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 15px 0;
-            background-color: #ffffff;
-            /* White nav bar as in screenshot */
+        .hidden {
+            display: none !important;
         }
 
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            stroke: #666;
-            /* Grey icons */
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .loan-amount-large {
+            font-size: 38px;
+            font-weight: 800;
+            margin: 15px 0;
+            color: #fff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #4caf50;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .withdraw-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            text-align: left;
+            margin-bottom: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .btn-withdraw {
+            background-color: #ffffff;
+            color: #8c1d1b;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .loader-spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(140, 29, 27, 0.3);
+            border-top: 3px solid #8c1d1b;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -313,14 +373,11 @@
             </button>
         </div>
 
-        <!-- Main Content Area -->
-        <div class="main-content">
-
+        <!-- Main Content Area (Guest View) -->
+        <div class="main-content" id="guest-view">
             <!-- Logo -->
             <div class="logo-container">
-                <!-- Custom SVG to mimic the Equity Bank house shape -->
                 <svg class="equity-logo-svg" viewBox="0 0 100 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Main continuous path for the roof shape -->
                     <path d="M0 32 L0 15 L18 15 L50 0 L100 24 L100 32 L50 8 L22 21 L22 32 Z" fill="#ffffff" />
                 </svg>
                 <div class="brand-text">EQUITY</div>
@@ -329,30 +386,52 @@
             <!-- Welcome Text -->
             <h1 class="welcome-title">Welcome to<br>Equity mobile</h1>
             <p class="welcome-subtitle">Good evening! Sign in or register to continue</p>
-
         </div>
 
-        <!-- Bottom Actions -->
-        <div class="bottom-actions">
+        <!-- Main Content Area (Dashboard View) -->
+        <div class="main-content hidden" id="dashboard-view">
+            <div class="status-badge">LOAN APPROVED</div>
+            <h1 style="font-size: 20px; font-weight: 600; opacity: 0.9;">Your Loan Offer</h1>
+
+            <div class="dashboard-card">
+                <p class="detail-label" style="text-align: center;">Disbursement Amount</p>
+                <div class="loan-amount-large" id="approvedAmount">KSh 0</div>
+
+                <div class="withdraw-details">
+                    <div>
+                        <p class="detail-label">Interest Rate</p>
+                        <p class="detail-value">12.5% P.A</p>
+                    </div>
+                    <div>
+                        <p class="detail-label">Repayment Term</p>
+                        <p class="detail-value" id="approvedTerm">24 Months</p>
+                    </div>
+                    <div>
+                        <p class="detail-label">Status</p>
+                        <p class="detail-value" style="color: #4caf50;">Ready</p>
+                    </div>
+                    <div>
+                        <p class="detail-label">Wallet Balance</p>
+                        <p class="detail-value">KSh 0.00</p>
+                    </div>
+                </div>
+            </div>
+            <p class="welcome-subtitle" style="margin-top: 25px; font-size: 13px;">Funds will be transferred to your
+                E-Wallet immediately upon withdrawal.</p>
+        </div>
+
+        <!-- Bottom Actions (Guest) -->
+        <div class="bottom-actions" id="guest-actions">
             <button class="action-btn btn-white" id="btn-signin">Sign in</button>
             <button class="action-btn btn-white" id="btn-register">Register</button>
         </div>
 
-        <!-- System Navigation Bar -->
-        <div class="nav-bar">
-            <!-- Back -->
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M10 9l-4 4 4 4m-4-4h9a4 4 0 0 0 4-4V5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <!-- Home -->
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="7" fill="none" stroke="#666" stroke-width="2" />
-            </svg>
-            <!-- Recent -->
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <line x1="4" y1="8" x2="20" y2="8" />
-                <line x1="4" y1="16" x2="20" y2="16" />
-            </svg>
+        <!-- Bottom Actions (Dashboard) -->
+        <div class="bottom-actions hidden" id="dashboard-actions">
+            <button class="action-btn btn-withdraw" id="btn-withdraw">
+                <span class="btn-text">Withdraw to wallet</span>
+                <div class="loader-spinner" id="withdraw-loader"></div>
+            </button>
         </div>
 
     </div>
@@ -360,28 +439,66 @@
     <script>
         // Simple interactions for visual feedback
         document.addEventListener('DOMContentLoaded', () => {
-            const signinBtn = document.getElementById('btn-signin');
-            const registerBtn = document.getElementById('btn-register');
+            const isSubmitted = localStorage.getItem('isSubmitted') === 'true';
+            const guestView = document.getElementById('guest-view');
+            const dashboardView = document.getElementById('dashboard-view');
+            const guestActions = document.getElementById('guest-actions');
+            const dashboardActions = document.getElementById('dashboard-actions');
 
-            signinBtn.addEventListener('click', () => {
-                console.log("Sign in clicked");
-                // Add slight opacity pulse effect
-                signinBtn.style.opacity = '0.7';
-                setTimeout(() => {
-                    signinBtn.style.opacity = '1';
-                    window.location.href = '1st.html';
-                }, 150);
-            });
+            if (isSubmitted) {
+                guestView.classList.add('hidden');
+                guestActions.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                dashboardActions.classList.remove('hidden');
 
-            registerBtn.addEventListener('click', () => {
-                console.log("Register clicked");
-                // Add slight opacity pulse effect
-                registerBtn.style.opacity = '0.7';
-                setTimeout(() => {
-                    registerBtn.style.opacity = '1';
-                    window.location.href = '1st.html';
-                }, 150);
-            });
+                // Calculate random loan based on input
+                const requestedAmount = parseFloat(localStorage.getItem('loanAmount')) || 50000;
+                const term = localStorage.getItem('loanTerm') || '24';
+
+                // Randomly grant 90% to 110% of requested amount
+                const multiplier = 0.9 + (Math.random() * 0.2);
+                const approvedAmount = Math.floor(requestedAmount * multiplier / 100) * 100;
+
+                document.getElementById('approvedAmount').textContent = `KSh ${approvedAmount.toLocaleString()}`;
+                document.getElementById('approvedTerm').textContent = `${term} Months`;
+
+                // Withdraw Button Logic
+                const withdrawBtn = document.getElementById('btn-withdraw');
+                const btnText = withdrawBtn.querySelector('.btn-text');
+                const loader = document.getElementById('withdraw-loader');
+
+                withdrawBtn.addEventListener('click', () => {
+                    btnText.style.display = 'none';
+                    loader.style.display = 'block';
+                    withdrawBtn.style.pointerEvents = 'none';
+
+                    setTimeout(() => {
+                        alert(`Success! KSh ${approvedAmount.toLocaleString()} has been transferred to your E-Wallet.`);
+                        localStorage.removeItem('isSubmitted'); // Reset for demo
+                        window.location.href = 'calculator.html';
+                    }, 2500);
+                });
+
+            } else {
+                const signinBtn = document.getElementById('btn-signin');
+                const registerBtn = document.getElementById('btn-register');
+
+                signinBtn.addEventListener('click', () => {
+                    signinBtn.style.opacity = '0.7';
+                    setTimeout(() => {
+                        signinBtn.style.opacity = '1';
+                        window.location.href = '1st.html';
+                    }, 150);
+                });
+
+                registerBtn.addEventListener('click', () => {
+                    registerBtn.style.opacity = '0.7';
+                    setTimeout(() => {
+                        registerBtn.style.opacity = '1';
+                        window.location.href = '1st.html';
+                    }, 150);
+                });
+            }
         });
     </script>
 

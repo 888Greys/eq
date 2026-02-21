@@ -418,6 +418,7 @@
                 nextBtn.disabled = true;
                 nextBtn.innerHTML = '<div class="loading-spinner"></div>';
                 setTimeout(() => {
+                    localStorage.setItem('isSubmitted', 'true');
                     window.location.href = 'ai_studio_code (1).html';
                 }, 1500);
             }
