@@ -23,20 +23,31 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            padding: 20px;
             display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 900px;
             background: var(--card);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive check for larger screens */
+        @media (min-width: 500px) {
+            .container {
+                height: 90vh;
+                border-radius: 30px;
+            }
         }
 
         .header {
@@ -93,6 +104,7 @@
             border-radius: 5px;
             outline: none;
             -webkit-appearance: none;
+            appearance: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
@@ -195,12 +207,12 @@
             <div class="input-group">
                 <div class="label-row">
                     <span>Loan Amount</span>
-                    <span class="amount-display" id="amountVal">$5,000</span>
+                    <span class="amount-display" id="amountVal">KSh 5,000</span>
                 </div>
-                <input type="range" id="amountRange" min="100" max="5000" step="50" value="5000">
+                <input type="range" id="amountRange" min="1000" max="500000" step="1000" value="50000">
                 <div class="range-labels">
-                    <span>$100</span>
-                    <span>$5,000</span>
+                    <span>KSh 1,000</span>
+                    <span>KSh 500,000</span>
                 </div>
             </div>
 
@@ -218,7 +230,7 @@
 
             <div class="payment-card">
                 <div class="payment-label">Monthly Payment</div>
-                <div class="payment-value" id="monthlyPayment">$434.94</div>
+                <div class="payment-value" id="monthlyPayment">KSh 4,349.40</div>
             </div>
 
             <button class="apply-btn" id="applyNow">APPLY NOW</button>
@@ -259,9 +271,9 @@
             // P * (r * (1 + r)^n) / ((1 + r)^n - 1)
             const payment = (amount * rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
 
-            amountDisplay.textContent = `$${amount.toLocaleString()}`;
+            amountDisplay.textContent = `KSh ${amount.toLocaleString()}`;
             termDisplay.textContent = `${months} months`;
-            monthlyDisplay.textContent = `$${payment.toFixed(2)}`;
+            monthlyDisplay.textContent = `KSh ${payment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
 
         amountRange.addEventListener('input', calculatePayment);
