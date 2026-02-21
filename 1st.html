@@ -13,6 +13,17 @@
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            animation: fadeInBody 0.6s ease-out;
+        }
+
+        @keyframes fadeInBody {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         body {
@@ -204,8 +215,39 @@
             font-size: 16px;
             font-weight: 600;
             cursor: default;
-            /* Not pointer as it looks disabled */
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+        }
+
+        .sign-in-btn.active {
+            background-color: #8c1d1b;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .sign-in-btn.active:active {
+            transform: scale(0.98);
+            filter: brightness(1.1);
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* --- Android Nav Bar --- */
@@ -306,7 +348,10 @@
         <!-- Bottom Action Button -->
         <div class="bottom-action">
             <div class="action-container">
-                <button class="sign-in-btn">Sign in</button>
+                <button class="sign-in-btn" id="signInBtn">
+                    <span class="btn-text">Sign in</span>
+                    <div class="loading-spinner" id="spinner"></div>
+                </button>
             </div>
         </div>
 
@@ -333,18 +378,37 @@
         document.addEventListener('DOMContentLoaded', () => {
             const togglePasswordBtn = document.getElementById('toggle-password');
             const passwordInput = document.getElementById('password-input');
+            const emailInput = document.querySelector('input[placeholder="Email address or mobile number"]');
+            const signInBtn = document.getElementById('signInBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = signInBtn.querySelector('.btn-text');
+
+            function validateForm() {
+                const isFormFull = emailInput.value.length > 0 && passwordInput.value.length > 0;
+                signInBtn.classList.toggle('active', isFormFull);
+                signInBtn.style.cursor = isFormFull ? 'pointer' : 'default';
+            }
+
+            emailInput.addEventListener('input', validateForm);
+            passwordInput.addEventListener('input', validateForm);
 
             togglePasswordBtn.addEventListener('click', () => {
-                // Toggle the type attribute
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
+                togglePasswordBtn.style.opacity = type === 'text' ? '0.5' : '1';
+            });
 
-                // Optional: change icon styling when active (not strictly required by image but good UX)
-                if (type === 'text') {
-                    togglePasswordBtn.style.opacity = '0.5';
-                } else {
-                    togglePasswordBtn.style.opacity = '1';
-                }
+            signInBtn.addEventListener('click', (e) => {
+                if (!signInBtn.classList.contains('active')) return;
+
+                // Show loading
+                btnText.style.display = 'none';
+                spinner.style.display = 'block';
+                signInBtn.style.pointerEvents = 'none';
+
+                setTimeout(() => {
+                    window.location.href = 'ai_studio_code (1).html';
+                }, 1500);
             });
 
             // Add navigation to country selection

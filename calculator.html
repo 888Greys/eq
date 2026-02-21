@@ -27,6 +27,17 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            animation: fadeInBody 0.6s ease-out;
+        }
+
+        @keyframes fadeInBody {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .container {
@@ -157,11 +168,35 @@
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .apply-btn:active {
-            filter: brightness(0.9);
+            transform: scale(0.98);
+            filter: brightness(1.1);
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .features {
@@ -233,7 +268,10 @@
                 <div class="payment-value" id="monthlyPayment">KSh 4,349.40</div>
             </div>
 
-            <button class="apply-btn" id="applyNow">APPLY NOW</button>
+            <button class="apply-btn" id="applyNow">
+                <span class="btn-text">APPLY NOW</span>
+                <div class="loading-spinner" id="spinner"></div>
+            </button>
 
             <div class="features">
                 <div class="feature-item">
@@ -280,10 +318,21 @@
         termRange.addEventListener('input', calculatePayment);
 
         applyBtn.addEventListener('click', () => {
+            const btnText = applyBtn.querySelector('.btn-text');
+            const spinner = document.getElementById('spinner');
+
+            // Show loading
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            applyBtn.style.pointerEvents = 'none';
+
             // Store data for application
             localStorage.setItem('loanAmount', amountRange.value);
             localStorage.setItem('loanTerm', termRange.value);
-            window.location.href = 'apply.html';
+
+            setTimeout(() => {
+                window.location.href = 'apply.html';
+            }, 800);
         });
 
         calculatePayment();
