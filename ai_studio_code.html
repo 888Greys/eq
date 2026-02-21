@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Selection Bottom Sheet</title>
+    <style>
+        /* --- Base Reset --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000;
+            /* Dark background for presentation */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Mobile Device Mockup Container --- */
+        .mobile-container {
+            width: 360px;
+            height: 800px;
+            background-color: #1a1a1a;
+            /* Background of the underlying page */
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Background Page Elements (Dimmed) --- */
+        .background-page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            opacity: 0.4;
+            /* Dim the background */
+            pointer-events: none;
+            /* Prevent interaction with background */
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-right svg {
+            width: 14px;
+            height: 14px;
+            fill: #fff;
+        }
+
+        .battery {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            color: #4cd964;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            flex-grow: 1;
+            text-align: center;
+            color: #888;
+            /* Dimmer text for background */
+        }
+
+        /* --- Overlay & Bottom Sheet --- */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .bottom-sheet {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 90%;
+            /* Takes up most of the screen */
+            background-color: #171513;
+            /* Very dark brownish grey */
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Sheet Header --- */
+        .sheet-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            left: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #ff6b6b;
+            /* Accent red color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .close-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .sheet-title {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Search Bar --- */
+        .search-container {
+            padding: 0 20px 20px 20px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: #000000;
+            /* Darker inside */
+            border: 1px solid #444;
+            /* Grey border */
+            border-radius: 25px;
+            /* Pill shape */
+            padding: 10px 15px;
+            height: 48px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            padding-right: 10px;
+        }
+
+        .search-input::placeholder {
+            color: #777;
+        }
+
+        .search-icon {
+            color: #999;
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        /* --- Country List --- */
+        .country-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+
+        /* Hide scrollbar for a cleaner look like the app */
+        .country-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .country-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #2a2a2a;
+            cursor: pointer;
+        }
+
+        .country-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Flag Container */
+        .flag-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 20px;
+            flex-shrink: 0;
+            background-color: #333;
+            /* Fallback */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .flag-icon svg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .country-name {
+            font-size: 17px;
+            flex-grow: 1;
+            font-weight: 400;
+        }
+
+        /* Custom Radio Button */
+        .radio-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #ff6b6b;
+            /* Accent red */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .radio-btn.selected {
+            background-color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        .radio-btn.selected::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #fff;
+        }
+
+        /* --- Bottom Nav Bar --- */
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 15px 0;
+            background-color: #171513;
+            /* Matches bottom sheet */
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 30;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            stroke: #888;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mobile-container">
+
+        <!-- Background Page (Dimmed) -->
+        <div class="background-page">
+            <!-- Faux Status Bar -->
+            <div class="status-bar">
+                <span>8:06</span>
+                <div class="status-right">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5z" />
+                    </svg>
+                    <span style="font-size: 10px;">44.6<br>KB/S</span>
+                    <span style="font-size: 10px; font-weight: bold;">4G</span>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+                    </svg>
+                    <div class="battery">
+                        <span style="font-size: 11px;">23</span>
+                        <svg viewBox="0 0 24 24" style="width:16px;height:16px;">
+                            <path d="M17 4h-3V2h-4v2H7v18h10V4zm-2 16H9V6h6v14z" fill="#4cd964" />
+                            <path d="M11 18h2v-4h-2v4zm0-6h2V8h-2v4z" fill="#1a1a1a" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <div class="icon-btn">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </div>
+                <div class="header-title">Welcome back</div>
+                <div class="icon-btn">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z"></path>
+                        <line x1="9" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="13" x2="15" y2="13"></line>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Overlay -->
+        <div class="overlay"></div>
+
+        <!-- Bottom Sheet -->
+        <div class="bottom-sheet">
+
+            <!-- Header -->
+            <div class="sheet-header">
+                <button class="close-btn">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="sheet-title">Country</div>
+            </div>
+
+            <!-- Search Input -->
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search for a country">
+                    <svg class="search-icon" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Country List -->
+            <ul class="country-list" id="countryList">
+
+                <!-- Kenya -->
+                <li class="country-item">
+                    <div class="flag-icon">
+                        <svg viewBox="0 0 100 100">
+                            <rect width="100" height="30" fill="#000000" />
+                            <rect y="30" width="100" height="5" fill="#FFFFFF" />
+                            <rect y="35" width="100" height="30" fill="#BB0000" />
+                            <rect y="65" width="100" height="5" fill="#FFFFFF" />
+                            <rect y="70" width="100" height="30" fill="#006600" />
+                            <!-- Simplified shield representation -->
+                            <path d="M40,25 Q50,15 60,25 L60,75 Q50,85 40,75 Z" fill="#BB0000" stroke="#FFFFFF"
+                                stroke-width="2" />
+                            <circle cx="50" cy="50" r="5" fill="#FFFFFF" />
+                            <!-- Spears -->
+                            <line x1="30" y1="20" x2="70" y2="80" stroke="#FFFFFF" stroke-width="2" />
+                            <line x1="70" y1="20" x2="30" y2="80" stroke="#FFFFFF" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <span class="country-name">Kenya</span>
+                    <div class="radio-btn"></div>
+                </li>
+
+                <!-- Rwanda -->
+                <li class="country-item">
+                    <div class="flag-icon">
+                        <svg viewBox="0 0 100 100">
+                            <rect width="100" height="50" fill="#00A1E4" />
+                            <rect y="50" width="100" height="25" fill="#FADB00" />
+                            <rect y="75" width="100" height="25" fill="#20603D" />
+                            <!-- Sun -->
+                            <circle cx="80" cy="25" r="10" fill="#FADB00" />
+                        </svg>
+                    </div>
+                    <span class="country-name">Rwanda</span>
+                    <div class="radio-btn"></div>
+                </li>
+
+                <!-- South Sudan -->
+                <li class="country-item">
+                    <div class="flag-icon">
+                        <svg viewBox="0 0 100 100">
+                            <rect width="100" height="30" fill="#000000" />
+                            <rect y="30" width="100" height="5" fill="#FFFFFF" />
+                            <rect y="35" width="100" height="30" fill="#E22028" />
+                            <rect y="65" width="100" height="5" fill="#FFFFFF" />
+                            <rect y="70" width="100" height="30" fill="#078930" />
+                            <!-- Blue Triangle -->
+                            <polygon points="0,0 60,50 0,100" fill="#0F47AF" />
+                            <!-- Yellow Star -->
+                            <polygon points="15,40 22,40 25,33 28,40 35,40 30,45 32,52 25,48 18,52 20,45"
+                                fill="#FCDD09" />
+                        </svg>
+                    </div>
+                    <span class="country-name">South Sudan</span>
+                    <div class="radio-btn"></div>
+                </li>
+
+                <!-- Tanzania -->
+                <li class="country-item">
+                    <div class="flag-icon">
+                        <svg viewBox="0 0 100 100">
+                            <rect width="100" height="100" fill="#1EB53A" />
+                            <polygon points="0,100 100,100 100,0" fill="#00A8E1" />
+                            <!-- Diagonal line needs yellow borders, easiest way is to stack polygons -->
+                            <polygon points="0,100 30,100 100,30 100,0" fill="#FCD116" />
+                            <polygon points="0,100 20,100 100,20 100,0" fill="#000000" />
+                            <polygon points="0,80 80,0 100,0 0,100" fill="#000000" />
+                            <!-- Fix the diagonal drawing with a better path to match standard flag -->
+                            <rect width="100" height="100" fill="#1EB53A" />
+                            <polygon points="0,100 100,100 100,0" fill="#00A8E1" />
+                            <!-- Draw the thick diagonal line with borders -->
+                            <polygon points="0,100 35,100 100,35 100,0 65,0 0,65" fill="#FCD116" />
+                            <polygon points="0,100 25,100 100,25 100,0 75,0 0,75" fill="#000000" />
+                        </svg>
+                    </div>
+                    <span class="country-name">Tanzania, United R...</span>
+                    <div class="radio-btn"></div>
+                </li>
+
+                <!-- Uganda -->
+                <li class="country-item">
+                    <div class="flag-icon">
+                        <svg viewBox="0 0 100 100">
+                            <rect y="0" width="100" height="16.6" fill="#000000" />
+                            <rect y="16.6" width="100" height="16.6" fill="#FCD116" />
+                            <rect y="33.2" width="100" height="16.6" fill="#D90000" />
+                            <rect y="49.8" width="100" height="16.6" fill="#000000" />
+                            <rect y="66.4" width="100" height="16.6" fill="#FCD116" />
+                            <rect y="83" width="100" height="17" fill="#D90000" />
+                            <!-- Center circle and abstract crane -->
+                            <circle cx="50" cy="50" r="15" fill="#FFFFFF" />
+                            <!-- Simplified crane shape -->
+                            <circle cx="50" cy="46" r="3" fill="#000000" />
+                            <path d="M48,50 L52,50 L54,58 L46,58 Z" fill="#000000" />
+                            <path d="M50,42 L52,44 L48,44 Z" fill="#D90000" />
+                        </svg>
+                    </div>
+                    <span class="country-name">Uganda</span>
+                    <div class="radio-btn"></div>
+                </li>
+
+                <!-- Padding element to ensure last item is visible above nav bar -->
+                <li style="height: 60px; border:none; padding:0; cursor:default;"></li>
+
+            </ul>
+
+        </div>
+
+        <!-- System Navigation Bar -->
+        <div class="nav-bar">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M10 9l-4 4 4 4m-4-4h9a4 4 0 0 0 4-4V5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="7" fill="none" stroke="#888" stroke-width="2" />
+            </svg>
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <line x1="4" y1="8" x2="20" y2="8" />
+                <line x1="4" y1="16" x2="20" y2="16" />
+            </svg>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const countryItems = document.querySelectorAll('.country-item');
+            const searchInput = document.querySelector('.search-input');
+
+            // Handle selecting a country
+            countryItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Remove selected class from all radio buttons
+                    document.querySelectorAll('.radio-btn').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+
+                    // Add selected class to clicked item's radio button
+                    const radioBtn = item.querySelector('.radio-btn');
+                    if (radioBtn) {
+                        radioBtn.classList.add('selected');
+                    }
+
+                    // Navigate back to 1st.html after selection
+                    setTimeout(() => {
+                        window.location.href = '1st.html';
+                    }, 300);
+                });
+            });
+
+            // Handle Close button
+            const closeBtn = document.querySelector('.close-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    window.location.href = '1st.html';
+                });
+            }
+
+            // Simple visual search filter functionality
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+
+                countryItems.forEach(item => {
+                    const countryName = item.querySelector('.country-name').textContent.toLowerCase();
+                    if (countryName.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
